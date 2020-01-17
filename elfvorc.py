@@ -121,7 +121,7 @@ def get_physical_damage(player, enemy):
     modifier = round(player.power * .25)
     damage = random.randint(-1 * modifier, modifier) + player.power - enemy.armor
     if damage <= 0:
-        damage += 1
+        damage = 1
     if critical == True:
         damage *= 2
     return critical, damage
@@ -133,7 +133,7 @@ def get_magical_damage(player, enemy):
     if damage <= 0:
         damage += 1
     if critical == True:
-        damage *= 1.5
+        damage *= round(1.5)
     return critical, damage
 
 def roll_20():
@@ -147,7 +147,7 @@ def rest(player):
     if player.mana >= 80:
         player.mana = 100
     else:
-        player.health += 20
+        player.mana += 20
     return player
 
 rest_choice_map = {
@@ -164,6 +164,7 @@ item_map = {
     3: "+1 Magic: 10g",
     4: "+1 Power: 10g",
     5: "+1 Armor: 10g",
+    6: "Leave Shop",
 }
 
 battle_choice_map = {
@@ -196,13 +197,14 @@ while continue_playing:
     elif player_choice == 4:
         print("Welcome to the shop")
         shop_choice = get_choice(item_map)
-        upgrade = item_map[shop_choice]
-        if player.gold >= 10:
-            wait()
-            buy_upgrade(player, upgrade)
-        else:
-            print("You don't have enough gold for that!")
-            wait()
+        if shop_choice != 6:
+            upgrade = item_map[shop_choice]
+            if player.gold >= 10:
+                wait()
+                buy_upgrade(player, upgrade)
+            else:
+                print("You don't have enough gold for that!")
+                wait()
 
     elif player_choice == 3:
        display_stats(player)
@@ -258,15 +260,16 @@ while continue_playing:
                 flee = True
         
             wait()
+            if orc.health > 0 or flee == False:
+                if roll_20() > 5:
+                    critical, damage = get_physical_damage(orc, player)
+                    if critical == True:
+                        print("CRITICAL HIT!")
+                    print(f"Orc hits you for {damage} damage")
+                    player.health -= damage
+                else:
+                    print("Orc missed you.")
 
-            if roll_20() > 5:
-                critical, damage = get_physical_damage(orc, player)
-                if critical == True:
-                    print("CRITICAL HIT!")
-                print(f"Orc hits you for {damage} damage")
-                player.health -= damage
-            else:
-                print("Orc missed you.")
 
         wait()
 
